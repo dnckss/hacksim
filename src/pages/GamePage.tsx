@@ -15,7 +15,7 @@ export const GamePage: React.FC = () => {
     selectMission
   } = useGame();
   
-  const [showMissionPanel, setShowMissionPanel] = useState(false);
+  const [showMissionPanel, setShowMissionPanel] = useState(true);
   
   if (!currentMission) {
     return <div className="text-center p-8">Loading...</div>;
@@ -44,45 +44,21 @@ export const GamePage: React.FC = () => {
       </header>
       
       {/* Main Content */}
-      <main className="flex-grow flex overflow-hidden relative">
-        {/* Mission Panel (slide from left) */}
-        <div 
-          className={`absolute top-0 left-0 h-full w-80 bg-gray-900 transform transition-transform duration-300 ease-in-out z-20 
-            ${showMissionPanel ? 'translate-x-0' : '-translate-x-full'}`}
-        >
-          <div className="h-full p-4 overflow-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-green-500">Missions</h2>
-              <button
-                onClick={() => setShowMissionPanel(false)}
-                className="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
-              >
-                Close
-              </button>
-            </div>
-            
+      <main className="flex-grow flex overflow-hidden">
+        {/* Mission Panel */}
+        {showMissionPanel && (
+          <div className="w-1/3 p-4 border-r border-gray-800">
             <MissionPanel
               missions={missions}
               currentMissionId={currentMissionId}
               gameState={gameState}
-              onSelectMission={(id) => {
-                selectMission(id);
-                setShowMissionPanel(false);
-              }}
+              onSelectMission={selectMission}
             />
           </div>
-        </div>
-        
-        {/* Overlay when mission panel is open */}
-        {showMissionPanel && (
-          <div 
-            className="absolute inset-0 bg-black bg-opacity-50 z-10"
-            onClick={() => setShowMissionPanel(false)}
-          />
         )}
         
         {/* Terminal Area */}
-        <div className="w-full p-4 overflow-hidden flex flex-col">
+        <div className={`${showMissionPanel ? 'w-2/3' : 'w-full'} p-4 overflow-hidden flex flex-col`}>
           {/* Terminal Component */}
           <div className="flex-grow overflow-hidden flex flex-col">
             <Terminal 
