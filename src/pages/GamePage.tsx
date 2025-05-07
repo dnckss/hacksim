@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Terminal } from '../components/Terminal';
 import { MissionPanel } from '../components/MissionPanel';
 import { useGame } from '../contexts/GameContext';
@@ -44,16 +44,22 @@ export const GamePage: React.FC = () => {
       </header>
       
       {/* Main Content */}
-      <main className="flex-grow flex overflow-hidden">
-        {/* Mission Panel (toggleable) */}
-        {showMissionPanel && (
-          <div className="absolute inset-0 z-10 p-4 bg-gray-900 bg-opacity-95">
-            <button
-              onClick={() => setShowMissionPanel(false)}
-              className="mb-4 px-3 py-1 bg-gray-800 rounded-md"
-            >
-              Close
-            </button>
+      <main className="flex-grow flex overflow-hidden relative">
+        {/* Mission Panel (slide from left) */}
+        <div 
+          className={`absolute top-0 left-0 h-full w-80 bg-gray-900 transform transition-transform duration-300 ease-in-out z-20 
+            ${showMissionPanel ? 'translate-x-0' : '-translate-x-full'}`}
+        >
+          <div className="h-full p-4 overflow-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-green-500">Missions</h2>
+              <button
+                onClick={() => setShowMissionPanel(false)}
+                className="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
+              >
+                Close
+              </button>
+            </div>
             
             <MissionPanel
               missions={missions}
@@ -65,6 +71,14 @@ export const GamePage: React.FC = () => {
               }}
             />
           </div>
+        </div>
+        
+        {/* Overlay when mission panel is open */}
+        {showMissionPanel && (
+          <div 
+            className="absolute inset-0 bg-black bg-opacity-50 z-10"
+            onClick={() => setShowMissionPanel(false)}
+          />
         )}
         
         {/* Terminal Area */}
