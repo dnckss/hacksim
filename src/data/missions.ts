@@ -29,12 +29,17 @@ export const missions: Mission[] = [
       "/home/guest": {
         type: "directory",
         children: {
-          "readme.txt": true
+          "readme.txt": true,
+          "system_notes.txt": true
         }
       },
       "/home/guest/readme.txt": {
         type: "file",
-        content: "Welcome to HackSim Terminal.\nYou need admin privileges to proceed.\nTry command 'whoami' to see your current user."
+        content: "Welcome to HackSim Terminal.\nYou need admin privileges to proceed.\nTry command 'whoami' to see your current user.\nCheck system_notes.txt for more information about system variables."
+      },
+      "/home/guest/system_notes.txt": {
+        type: "file",
+        content: "System Variables:\n- isAdmin: Controls admin access (true/false)\n\nUse 'set' command to modify system variables."
       },
       "/home/admin": {
         type: "directory",
