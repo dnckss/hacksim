@@ -40,11 +40,11 @@ export const missions: Mission[] = [
       },
       "/home/guest/system_notes.txt": {
         type: "file",
-        content: "System Variables:\n- isAdmin: Controls admin access (true/false)\n\nUse 'set' command to modify system variables.\nExample: set isAdmin true"
+        content: "System Variables:\n- isAdmin: Controls admin access (true/false)\n\nUse 'set' command to modify system variables."
       },
       "/home/guest/help_guide.txt": {
         type: "file",
-        content: "Useful commands for exploration:\n- ls: List files in current directory\n- cd: Change directory\n- cat: Read file contents\n\nTip: Try exploring the /home/admin directory after gaining admin access."
+        content: "Useful commands for exploration:\n- ls: List files in current directory\n- cd: Change directory\n- cat: Read file contents\n"
       },
       "/home/admin": {
         type: "directory",
