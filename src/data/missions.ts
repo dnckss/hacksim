@@ -30,36 +30,51 @@ export const missions: Mission[] = [
         type: "directory",
         children: {
           "readme.txt": true,
-          "system_notes.txt": true
+          "system_notes.txt": true,
+          "help_guide.txt": true
         }
       },
       "/home/guest/readme.txt": {
         type: "file",
-        content: "Welcome to HackSim Terminal.\nYou need admin privileges to proceed.\nTry command 'whoami' to see your current user.\nCheck system_notes.txt for more information about system variables."
+        content: "Welcome to HackSim Terminal.\nYou need admin privileges to proceed.\nTry command 'whoami' to see your current user.\nCheck system_notes.txt for more information about system variables.\nUse 'help' command to see all available commands."
       },
       "/home/guest/system_notes.txt": {
         type: "file",
-        content: "System Variables:\n- isAdmin: Controls admin access (true/false)\n\nUse 'set' command to modify system variables."
+        content: "System Variables:\n- isAdmin: Controls admin access (true/false)\n\nUse 'set' command to modify system variables.\nExample: set isAdmin true"
+      },
+      "/home/guest/help_guide.txt": {
+        type: "file",
+        content: "Useful commands for exploration:\n- ls: List files in current directory\n- cd: Change directory\n- cat: Read file contents\n\nTip: Try exploring the /home/admin directory after gaining admin access."
       },
       "/home/admin": {
         type: "directory",
         children: {
-          "flag1.txt": true
+          "flag1.txt": true,
+          "mission_complete.txt": true
         }
       },
       "/home/admin/flag1.txt": {
         type: "file",
         content: "FLAG{Y0U_BYPAS5ED_AUTH}"
       },
+      "/home/admin/mission_complete.txt": {
+        type: "file",
+        content: "Congratulations! You've found the flag.\nThis completes the first mission of gaining admin access."
+      },
       "/etc": {
         type: "directory",
         children: {
-          "passwd": true
+          "passwd": true,
+          "system_info.txt": true
         }
       },
       "/etc/passwd": {
         type: "file",
         content: "guest:x:1000:1000:/home/guest:/bin/bash\nadmin:x:0:0:/home/admin:/bin/bash"
+      },
+      "/etc/system_info.txt": {
+        type: "file",
+        content: "System directories:\n/home/guest - Current user directory\n/home/admin - Admin directory (requires privileges)\n/etc - System configuration files"
       }
     },
     objectives: [
@@ -195,7 +210,8 @@ export const missions: Mission[] = [
         type: "directory",
         children: {
           "encrypted.txt": true,
-          "hint.txt": true
+          "hint.txt": true,
+          "decode_help.txt": true
         }
       },
       "/home/admin/encrypted.txt": {
@@ -204,7 +220,11 @@ export const missions: Mission[] = [
       },
       "/home/admin/hint.txt": {
         type: "file",
-        content: "The file is encoded in a common format used for transmitting binary data over text-based mediums."
+        content: "The file is encoded in a common format used for transmitting binary data over text-based mediums.\nTry using the 'decode' command with the appropriate encoding type."
+      },
+      "/home/admin/decode_help.txt": {
+        type: "file",
+        content: "Available decode commands:\n- decode base64 <string>\n\nExample usage:\ndecode base64 SGVsbG8="
       },
       "/usr": {
         type: "directory",
@@ -220,7 +240,7 @@ export const missions: Mission[] = [
       },
       "/usr/bin/tools.txt": {
         type: "file",
-        content: "Available tools: decode base64, encode base64"
+        content: "Available tools:\n- decode base64: Decode base64 encoded strings\n- encode base64: Encode strings to base64\n\nUse 'help' command for more information."
       }
     },
     objectives: [
