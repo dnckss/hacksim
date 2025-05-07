@@ -17,25 +17,6 @@ export const GamePage: React.FC = () => {
   
   const [showMissionPanel, setShowMissionPanel] = useState(false);
   
-  // Handle window resize for responsive layout
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-  
-  // Close mission panel when switching to mobile
-  useEffect(() => {
-    if (isMobile) {
-      setShowMissionPanel(false);
-    }
-  }, [isMobile]);
-  
   if (!currentMission) {
     return <div className="text-center p-8">Loading...</div>;
   }
@@ -64,33 +45,30 @@ export const GamePage: React.FC = () => {
       
       {/* Main Content */}
       <main className="flex-grow flex overflow-hidden">
-        {/* Mission Panel (hidden on mobile unless toggled) */}
-        {(showMissionPanel || !isMobile) && (
-          <div 
-            className={`
-              ${isMobile ? 'absolute inset-0 z-10 p-4 bg-gray-900 bg-opacity-95' : 'w-1/3 p-4 border-r border-gray-800'}
-            `}
-          >
-            {isMobile && (
-              <button
-                onClick={() => setShowMissionPanel(false)}
-                className="mb-4 px-3 py-1 bg-gray-800 rounded-md"
-              >
-                Close
-              </button>
-            )}
+        {/* Mission Panel (toggleable) */}
+        {showMissionPanel && (
+          <div className="absolute inset-0 z-10 p-4 bg-gray-900 bg-opacity-95">
+            <button
+              onClick={() => setShowMissionPanel(false)}
+              className="mb-4 px-3 py-1 bg-gray-800 rounded-md"
+            >
+              Close
+            </button>
             
             <MissionPanel
               missions={missions}
               currentMissionId={currentMissionId}
               gameState={gameState}
-              onSelectMission={selectMission}
+              onSelectMission={(id) => {
+                selectMission(id);
+                setShowMissionPanel(false);
+              }}
             />
           </div>
         )}
         
         {/* Terminal Area */}
-        <div className={`${isMobile || showMissionPanel ? 'w-full' : 'w-2/3'} p-4 overflow-hidden flex flex-col`}>
+        <div className="w-full p-4 overflow-hidden flex flex-col">
           {/* Terminal Component */}
           <div className="flex-grow overflow-hidden flex flex-col">
             <Terminal 
