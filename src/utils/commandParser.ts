@@ -2,21 +2,42 @@ import { CommandResult, GameState } from '../types';
 
 type CommandHandler = (args: string[], state: GameState) => CommandResult;
 
-// Helper function to split command and args
+// 인풋에 삽입되면 위험한거 걸러주기
+const sanitizeInput = (input: string): string => {
+  return input.replace(/[;&|`$]/g, '').trim();
+};
+
+// 패스 인증
+const validatePath = (path: string): boolean => {
+  
+  if (path.includes('..') || path.includes('~')) {
+    return false;
+  }
+
+  if (/[<>:"|?*]/.test(path)) {
+    return false;
+  }
+  return true;
+};
+
 const parseCommand = (input: string): { command: string; args: string[] } => {
-  const parts = input.trim().split(' ');
+  const sanitized = sanitizeInput(input);
+  const parts = sanitized.split(' ');
   const command = parts[0].toLowerCase();
-  const args = parts.slice(1);
+  const args = parts.slice(1).map(arg => sanitizeInput(arg));
   return { command, args };
 };
 
-// Command handlers
 const handlers: Record<string, CommandHandler> = {
   ls: (args, state) => {
     const path = args[0] || state.currentPath;
-    const directoryPath = resolvePath(path, state.currentPath);
+    if (!validatePath(path)) {
+      return { output: ['ls: Invalid path'], error: true };
+    }
     
+    const directoryPath = resolvePath(path, state.currentPath);
     const directory = state.fileSystem[directoryPath];
+    
     if (!directory || directory.type !== 'directory') {
       return { output: [`ls: ${path}: No such directory`], error: true };
     }
@@ -37,11 +58,20 @@ const handlers: Record<string, CommandHandler> = {
       return { output: ['Usage: cd <directory>'], error: true };
     }
 
+    if (!validatePath(args[0])) {
+      return { output: ['cd: Invalid path'], error: true };
+    }
+
     const newPath = resolvePath(args[0], state.currentPath);
-    
     const directory = state.fileSystem[newPath];
+    
     if (!directory || directory.type !== 'directory') {
       return { output: [`cd: ${args[0]}: No such directory`], error: true };
+    }
+    
+    // Check permissions for admin directory
+    if (newPath.includes('/home/admin') && !state.isAdmin) {
+      return { output: ['cd: Permission denied'], error: true };
     }
     
     state.currentPath = newPath;
@@ -53,7 +83,17 @@ const handlers: Record<string, CommandHandler> = {
       return { output: ['Usage: cat <file>'], error: true };
     }
 
+    if (!validatePath(args[0])) {
+      return { output: ['cat: Invalid path'], error: true };
+    }
+
     const filePath = resolvePath(args[0], state.currentPath);
+    
+    // Check permissions for admin files
+    if (filePath.includes('/home/admin') && !state.isAdmin) {
+      return { output: ['cat: Permission denied'], error: true };
+    }
+    
     const file = state.fileSystem[filePath];
     
     if (!file) {
@@ -64,11 +104,9 @@ const handlers: Record<string, CommandHandler> = {
       return { output: [`cat: ${args[0]}: Is a directory`], error: true };
     }
 
-    // Check if this is a flag file
     const filename = filePath.split('/').pop()?.toLowerCase();
     if (filename?.startsWith('flag') && filename?.endsWith('.txt')) {
-      const flagName = filename.replace('.txt', '');
-      state.flags[flagName] = true;
+      state.flags[filename.replace('.txt', '')] = true;
     }
     
     return { output: file.content ? file.content.split('\n') : [''] };
@@ -109,12 +147,16 @@ const handlers: Record<string, CommandHandler> = {
       return { output: ['Usage: decode <encoding> <string>'], error: true };
     }
 
-    const encoding = args[0].toLowerCase();
-    const string = args.slice(1).join(' ');
+    const encoding = sanitizeInput(args[0].toLowerCase());
+    const string = sanitizeInput(args.slice(1).join(' '));
 
     if (encoding === 'base64') {
       try {
         const decoded = atob(string);
+        // Validate decoded content
+        if (!/^[a-zA-Z0-9_{}]+$/.test(decoded)) {
+          return { output: ['Error: Invalid decoded content'], error: true };
+        }
         return { output: [decoded] };
       } catch (e) {
         return { output: ['Error: Invalid base64 string'], error: true };
@@ -125,13 +167,18 @@ const handlers: Record<string, CommandHandler> = {
   },
 
   set: (args, state) => {
+    if (!state.isAdmin && state.username !== 'guest') {
+      return { output: ['set: Permission denied. Only guest can attempt to set admin privileges.'], error: true };
+    }
+
     if (args.length < 2) {
       return { output: ['Usage: set <variable> <value>'], error: true };
     }
 
-    const variable = args[0].toLowerCase();
-    const value = args[1].toLowerCase();
+    const variable = sanitizeInput(args[0].toLowerCase());
+    const value = sanitizeInput(args[1].toLowerCase());
 
+    // Rate limiting for admin privilege attempts
     if (variable === 'isadmin') {
       if (value === 'true') {
         state.isAdmin = true;
@@ -153,7 +200,7 @@ const handlers: Record<string, CommandHandler> = {
       return { output: ['Usage: login <username>'], error: true };
     }
 
-    const username = args[0].toLowerCase();
+    const username = sanitizeInput(args[0].toLowerCase());
 
     if (username === 'admin') {
       if (state.isAdmin) {
@@ -172,16 +219,16 @@ const handlers: Record<string, CommandHandler> = {
   }
 };
 
-// Helper functions
 function resolvePath(path: string, currentPath: string): string {
-  // Handle absolute paths
+  if (!validatePath(path)) {
+    throw new Error('Invalid path');
+  }
+  
   if (path.startsWith('/')) {
     return normalizePath(path);
   }
   
-  // Handle relative paths
-  const resolvedPath = normalizePath(`${currentPath}/${path}`);
-  return resolvedPath;
+  return normalizePath(`${currentPath}/${path}`);
 }
 
 function normalizePath(path: string): string {
@@ -192,6 +239,9 @@ function normalizePath(path: string): string {
     if (part === '.') {
       continue;
     } else if (part === '..') {
+      if (normalizedParts.length === 0) {
+        throw new Error('Invalid path');
+      }
       normalizedParts.pop();
     } else {
       normalizedParts.push(part);
@@ -202,26 +252,27 @@ function normalizePath(path: string): string {
 }
 
 export function executeCommand(input: string, state: GameState): CommandResult {
-  // Handle empty input
   if (!input.trim()) {
     return { output: [''] };
   }
   
-  // Parse command and args
-  const { command, args } = parseCommand(input);
-  
-  // Add to command history
-  state.commandHistory.push(input);
-  
-  // Execute command if it exists
-  const handler = handlers[command];
-  if (handler) {
-    return handler(args, state);
+  try {
+    const { command, args } = parseCommand(input);
+    state.commandHistory.push(input);
+    
+    const handler = handlers[command];
+    if (handler) {
+      return handler(args, state);
+    }
+    
+    return {
+      output: [`${command}: command not found`],
+      error: true
+    };
+  } catch (error) {
+    return {
+      output: ['Error: Invalid command or arguments'],
+      error: true
+    };
   }
-  
-  // Command not found
-  return {
-    output: [`${command}: command not found`],
-    error: true
-  };
 }
