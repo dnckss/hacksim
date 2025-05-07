@@ -2,7 +2,7 @@ import React, { createContext, useContext, useReducer, useEffect, ReactNode } fr
 import { GameState, Mission } from '../types';
 import { initializeMission, getMission, getAllMissions } from '../utils/gameEngine';
 
-// Define the context shape
+
 interface GameContextType {
   gameState: GameState;
   currentMission: Mission | null;
@@ -13,7 +13,7 @@ interface GameContextType {
   selectMission: (id: number) => void;
 }
 
-// Initial context state
+
 const initialContext: GameContextType = {
   gameState: {} as GameState,
   currentMission: null,
@@ -24,16 +24,16 @@ const initialContext: GameContextType = {
   selectMission: () => {}
 };
 
-// Create the context
+
 const GameContext = createContext<GameContextType>(initialContext);
 
-// Action types
+
 type GameAction = 
   | { type: 'UPDATE_GAME_STATE'; payload: GameState }
   | { type: 'COMPLETE_MISSION' }
   | { type: 'SELECT_MISSION'; payload: number };
 
-// Reducer
+
 function gameReducer(state: GameContextType, action: GameAction): GameContextType {
   switch (action.type) {
     case 'UPDATE_GAME_STATE':
@@ -46,7 +46,7 @@ function gameReducer(state: GameContextType, action: GameAction): GameContextTyp
       const nextMission = getMission(nextMissionId);
       
       if (!nextMission) {
-        return state; // No more missions
+        return state;
       }
       
       return {
@@ -57,7 +57,7 @@ function gameReducer(state: GameContextType, action: GameAction): GameContextTyp
       };
     case 'SELECT_MISSION':
       if (action.payload > state.currentMissionId) {
-        return state; // Can't skip ahead
+        return state; 
       }
       
       const selectedMission = getMission(action.payload);
@@ -76,9 +76,9 @@ function gameReducer(state: GameContextType, action: GameAction): GameContextTyp
   }
 }
 
-// Provider component
+
 export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Load initial missions & state
+
   const [state, dispatch] = useReducer(gameReducer, {
     ...initialContext,
     missions: getAllMissions(),
@@ -87,7 +87,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     gameState: initializeMission(1)
   });
 
-  // Define dispatch functions
+  
   const updateGameState = (gameState: GameState) => {
     dispatch({ type: 'UPDATE_GAME_STATE', payload: gameState });
   };
@@ -95,7 +95,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const completeMission = () => {
     dispatch({ type: 'COMPLETE_MISSION' });
     
-    // Save progress to localStorage
+    
     const nextMissionId = state.currentMissionId + 1;
     localStorage.setItem('currentMissionId', nextMissionId.toString());
   };
@@ -104,7 +104,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     dispatch({ type: 'SELECT_MISSION', payload: id });
   };
 
-  // Load saved mission progress from localStorage on initial load
+
   useEffect(() => {
     const savedMissionId = localStorage.getItem('currentMissionId');
     if (savedMissionId) {
@@ -129,5 +129,5 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
-// Hook for using the game context
+
 export const useGame = () => useContext(GameContext);
