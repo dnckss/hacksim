@@ -23,7 +23,7 @@ export const GamePage: React.FC = () => {
   
   return (
     <div className="flex flex-col h-screen bg-gray-950 text-white">
-      {/* Header */}
+      
       <header className="bg-gray-900 border-b border-gray-800 p-4">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -43,9 +43,9 @@ export const GamePage: React.FC = () => {
         </div>
       </header>
       
-      {/* Main Content */}
+      
       <main className="flex-grow flex overflow-hidden">
-        {/* Mission Panel */}
+        
         {showMissionPanel && (
           <div className="w-1/3 p-4 border-r border-gray-800">
             <MissionPanel
@@ -57,9 +57,9 @@ export const GamePage: React.FC = () => {
           </div>
         )}
         
-        {/* Terminal Area */}
+        
         <div className={`${showMissionPanel ? 'w-2/3' : 'w-full'} p-4 overflow-hidden flex flex-col`}>
-          {/* Terminal Component */}
+          
           <div className="flex-grow overflow-hidden flex flex-col">
             <Terminal 
               gameState={gameState}
@@ -71,7 +71,7 @@ export const GamePage: React.FC = () => {
         </div>
       </main>
       
-      {/* Footer */}
+      
       <footer className="bg-gray-900 border-t border-gray-800 p-3 text-center text-sm text-gray-500">
         <div className="flex items-center justify-center gap-2">
           <TerminalIcon size={14} />

@@ -2,7 +2,7 @@ import { GameState, Mission, CommandResult } from '../types';
 import { executeCommand } from './commandParser';
 import { missions } from '../data/missions';
 
-// Initialize a new game state for a mission
+
 export function initializeMission(missionId: number): GameState {
   const mission = missions.find(m => m.id === missionId);
   
@@ -22,7 +22,7 @@ export function initializeMission(missionId: number): GameState {
   };
 }
 
-// Execute a command and update the game state
+
 export function processCommand(input: string, state: GameState, mission: Mission): { result: CommandResult; missionComplete: boolean } {
   const result = executeCommand(input, state);
   const missionComplete = checkMissionCompletion(state, mission);
@@ -35,7 +35,7 @@ export function processCommand(input: string, state: GameState, mission: Mission
   };
 }
 
-// Check if all mission objectives are completed
+
 function checkMissionCompletion(state: GameState, mission: Mission): boolean {
   const allObjectivesCompleted = mission.objectives.every(
     (objective, index) => {
@@ -48,17 +48,17 @@ function checkMissionCompletion(state: GameState, mission: Mission): boolean {
   return allObjectivesCompleted;
 }
 
-// Get current mission
+
 export function getCurrentMission(missionId: number): Mission | undefined {
   return missions.find(m => m.id === missionId);
 }
 
-// Get mission by ID
+
 export function getMission(id: number): Mission | undefined {
   return missions.find(m => m.id === id);
 }
 
-// Get all missions
+
 export function getAllMissions(): Mission[] {
   return missions;
 }

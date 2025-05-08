@@ -89,7 +89,7 @@ const handlers: Record<string, CommandHandler> = {
 
     const filePath = resolvePath(args[0], state.currentPath);
     
-    // Check permissions for admin files
+    // 어드민 파일 권한 확인
     if (filePath.includes('/home/admin') && !state.isAdmin) {
       return { output: ['cat: Permission denied'], error: true };
     }
