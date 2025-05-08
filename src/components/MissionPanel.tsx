@@ -5,7 +5,6 @@ import { CheckCircle, Circle, Lock } from 'lucide-react';
 interface MissionPanelProps {
   missions: Mission[];
   currentMissionId: number;
-  highestMissionId: number;
   gameState: GameState;
   onSelectMission: (id: number) => void;
 }
@@ -13,7 +12,6 @@ interface MissionPanelProps {
 export const MissionPanel: React.FC<MissionPanelProps> = ({
   missions,
   currentMissionId,
-  highestMissionId,
   gameState,
   onSelectMission
 }) => {
@@ -21,7 +19,7 @@ export const MissionPanel: React.FC<MissionPanelProps> = ({
   const [selectedMissionId, setSelectedMissionId] = useState<number | null>(null);
 
   const handleMissionClick = (mission: Mission) => {
-    if (mission.id > highestMissionId) {
+    if (mission.id > currentMissionId) {
       setSelectedMissionId(mission.id);
     } else {
       onSelectMission(mission.id);
@@ -52,8 +50,8 @@ export const MissionPanel: React.FC<MissionPanelProps> = ({
       <div className="space-y-3">
         {missions.map((mission) => {
           const isCurrent = mission.id === currentMissionId;
-          const isCompleted = mission.id < highestMissionId;
-          const isLocked = mission.id > highestMissionId;
+          const isCompleted = mission.id < currentMissionId;
+          const isLocked = mission.id > currentMissionId;
           
           return (
             <div 
