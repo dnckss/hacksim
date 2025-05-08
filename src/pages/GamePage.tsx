@@ -9,6 +9,7 @@ export const GamePage: React.FC = () => {
     gameState, 
     currentMission, 
     currentMissionId,
+    highestMissionId,
     missions,
     updateGameState, 
     completeMission,
@@ -23,7 +24,6 @@ export const GamePage: React.FC = () => {
   
   return (
     <div className="flex flex-col h-screen bg-gray-950 text-white">
-      
       <header className="bg-gray-900 border-b border-gray-800 p-4">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -43,23 +43,20 @@ export const GamePage: React.FC = () => {
         </div>
       </header>
       
-      
       <main className="flex-grow flex overflow-hidden">
-        {/* Mission Panel */}
         {showMissionPanel && (
           <div className="w-1/3 p-4 border-r border-gray-800">
             <MissionPanel
               missions={missions}
               currentMissionId={currentMissionId}
+              highestMissionId={highestMissionId}
               gameState={gameState}
               onSelectMission={selectMission}
             />
           </div>
         )}
         
-        
         <div className={`${showMissionPanel ? 'w-2/3' : 'w-full'} p-4 overflow-hidden flex flex-col`}>
-          
           <div className="flex-grow overflow-hidden flex flex-col">
             <Terminal 
               gameState={gameState}
@@ -70,7 +67,6 @@ export const GamePage: React.FC = () => {
           </div>
         </div>
       </main>
-      
       
       <footer className="bg-gray-900 border-t border-gray-800 p-3 text-center text-sm text-gray-500">
         <div className="flex items-center justify-center gap-2">

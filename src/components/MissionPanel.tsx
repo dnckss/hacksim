@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Mission, GameState } from '../types';
 import { CheckCircle, Circle, Lock } from 'lucide-react';
 
 interface MissionPanelProps {
   missions: Mission[];
   currentMissionId: number;
+  highestMissionId: number;
   gameState: GameState;
   onSelectMission: (id: number) => void;
 }
@@ -12,34 +13,13 @@ interface MissionPanelProps {
 export const MissionPanel: React.FC<MissionPanelProps> = ({
   missions,
   currentMissionId,
+  highestMissionId,
   gameState,
   onSelectMission
 }) => {
-  const [flagInput, setFlagInput] = useState('');
-  const [selectedMissionId, setSelectedMissionId] = useState<number | null>(null);
-
   const handleMissionClick = (mission: Mission) => {
-    if (mission.id > currentMissionId) {
-      setSelectedMissionId(mission.id);
-    } else {
+    if (mission.id <= highestMissionId) {
       onSelectMission(mission.id);
-    }
-  };
-
-  const handleFlagSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedMissionId) return;
-
-    const previousMission = missions.find(m => m.id === selectedMissionId - 1);
-    if (!previousMission) return;
-
-    const expectedFlag = previousMission.fileSystem[`/home/admin/flag${previousMission.id}.txt`]?.content;
-    if (flagInput.trim() === expectedFlag) {
-      onSelectMission(selectedMissionId);
-      setSelectedMissionId(null);
-      setFlagInput('');
-    } else {
-      alert('Incorrect flag! Please try again.');
     }
   };
 
@@ -51,7 +31,7 @@ export const MissionPanel: React.FC<MissionPanelProps> = ({
         {missions.map((mission) => {
           const isCurrent = mission.id === currentMissionId;
           const isCompleted = mission.id < currentMissionId;
-          const isLocked = mission.id > currentMissionId;
+          const isLocked = mission.id > highestMissionId;
           
           return (
             <div 
@@ -68,7 +48,7 @@ export const MissionPanel: React.FC<MissionPanelProps> = ({
                   {isCompleted && (
                     <CheckCircle className="text-green-500" size={20} />
                   )}
-                  {isCurrent && (
+                  {isCurrent && !isCompleted && (
                     <Circle className="text-yellow-400" size={20} />
                   )}
                   {isLocked && (
@@ -112,41 +92,6 @@ export const MissionPanel: React.FC<MissionPanelProps> = ({
           );
         })}
       </div>
-
-      {selectedMissionId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full">
-            <h3 className="text-xl font-bold text-green-400 mb-4">Enter Flag to Unlock Mission {selectedMissionId}</h3>
-            <form onSubmit={handleFlagSubmit}>
-              <input
-                type="text"
-                value={flagInput}
-                onChange={(e) => setFlagInput(e.target.value)}
-                className="w-full bg-gray-900 text-green-400 p-2 rounded mb-4"
-                placeholder="Enter flag from previous mission..."
-              />
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedMissionId(null);
-                    setFlagInput('');
-                  }}
-                  className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500"
-                >
-                  Submit
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
