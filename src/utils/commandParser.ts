@@ -2,18 +2,18 @@ import { CommandResult, GameState } from '../types';
 
 type CommandHandler = (args: string[], state: GameState) => CommandResult;
 
-// 인풋에 삽입되면 위험한거 걸러주기
+// input 확인
 const sanitizeInput = (input: string): string => {
   return input.replace(/[;&|`$]/g, '').trim();
 };
 
-// 패스 인증
+// path 확인
 const validatePath = (path: string): boolean => {
-  
-  if (path.includes('..') || path.includes('~')) {
-    return false;
+  // cd .. 가능하게 해버리기
+  if (path === '..') {
+    return true;
   }
-
+  // 보안 검사
   if (/[<>:"|?*]/.test(path)) {
     return false;
   }
@@ -62,14 +62,26 @@ const handlers: Record<string, CommandHandler> = {
       return { output: ['cd: Invalid path'], error: true };
     }
 
-    const newPath = resolvePath(args[0], state.currentPath);
+    let newPath;
+    if (args[0] === '..') {
+      // 부모 디렉토리 가기
+      const pathParts = state.currentPath.split('/').filter(Boolean);
+      if (pathParts.length === 0) {
+        return { output: ['Already at root directory'], error: true };
+      }
+      pathParts.pop();
+      newPath = '/' + pathParts.join('/');
+    } else {
+      newPath = resolvePath(args[0], state.currentPath);
+    }
+
     const directory = state.fileSystem[newPath];
     
     if (!directory || directory.type !== 'directory') {
       return { output: [`cd: ${args[0]}: No such directory`], error: true };
     }
     
-    // Check permissions for admin directory
+    // 어드민 디렉토리 권한 확인
     if (newPath.includes('/home/admin') && !state.isAdmin) {
       return { output: ['cd: Permission denied'], error: true };
     }
@@ -130,6 +142,7 @@ const handlers: Record<string, CommandHandler> = {
         'Available commands:',
         '  ls [directory]    - List directory contents',
         '  cd <directory>    - Change current directory',
+        '  cd ..             - Move to parent directory',
         '  cat <file>        - Display file contents',
         '  pwd               - Print working directory',
         '  whoami            - Display current user',
@@ -153,7 +166,7 @@ const handlers: Record<string, CommandHandler> = {
     if (encoding === 'base64') {
       try {
         const decoded = atob(string);
-        // Validate decoded content
+        
         if (!/^[a-zA-Z0-9_{}]+$/.test(decoded)) {
           return { output: ['Error: Invalid decoded content'], error: true };
         }
@@ -178,7 +191,7 @@ const handlers: Record<string, CommandHandler> = {
     const variable = sanitizeInput(args[0].toLowerCase());
     const value = sanitizeInput(args[1].toLowerCase());
 
-    // Rate limiting for admin privilege attempts
+    
     if (variable === 'isadmin') {
       if (value === 'true') {
         state.isAdmin = true;

@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 
 interface TerminalProps {
   gameState: GameState;
-  mission: any;  // using any for now, should be Mission
+  mission: any;  
   onMissionComplete: () => void;
   onUpdateGameState: (state: GameState) => void;
 }
