@@ -9,14 +9,9 @@ const sanitizeInput = (input: string): string => {
 
 // path 확인
 const validatePath = (path: string): boolean => {
-  // cd .. 가능하게 해버리기
-  if (path === '..') {
-    return true;
-  }
-  // 보안 검사
-  if (/[<>:"|?*]/.test(path)) {
-    return false;
-  }
+  if (!path) return false;
+  if (path === '..') return true;
+  if (/[<>:"|?*]/.test(path)) return false;
   return true;
 };
 
